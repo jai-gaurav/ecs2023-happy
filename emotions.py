@@ -1,29 +1,61 @@
 import pygame
-
+from random import choice
 
 # define constants
 WIDTH = 480
 HEIGHT = 320
 WHITE = (255, 255, 255)
 BLACK = (0, 0, 0)
-FPS = 10
+FPS = 24
+EXPRESSIONS = ["LOOK_LEFT"]
+IDLETIME = 100
+
+# global variables
+frame = 0
+animationOngoing = False
+cur_emotion = "IDLE"
 
 # WIN = pygame.display.set_mode((WIDTH, HEIGHT), pygame.NOFRAME)
 WIN = pygame.display.set_mode((WIDTH, HEIGHT))
 pygame.display.set_caption("ECS Project")
 
 
-# function to set window fill color
-def window_fill(color):
-    WIN.fill(color)
+########################
+### CUSTOM FUNCTIONS ###
+########################
 
+# function to display emotion sprite
+def dispEmote(emoteName):
+    global frame
+    global animationOngoing
+    global cur_emotion
+    path = "Expressions\\{folder}\\{emotion}_{frame_no}.png".format(
+        folder = emoteName.capitalize(), 
+        emotion = emoteName.lower(),
+        frame_no = frame
+        )
+    
+    try:
+        img = pygame.image.load(path).convert()
+        WIN.blit(img, (0, 0))
+        pygame.display.update()
+        frame += 1
+    except FileNotFoundError:
+        frame = 0
+        animationOngoing = False
+        cur_emotion = "IDLE"
+    
+    
+    
 
 # main driver function
 def main():
+    global frame
+    global animationOngoing
+    global cur_emotion
     clock = pygame.time.Clock()
     run = True
-
-    toggle = True
+    tick = 0
 
     while run:
         clock.tick(FPS)
@@ -31,9 +63,14 @@ def main():
             if event.type == pygame.QUIT:
                 run = False
         
-        window_fill(WHITE)
-        pygame.PixelArray(WIN)[240:, :160] = 0xFF0000
-        pygame.display.update()
+        # logic to change to new expression
+        if not(animationOngoing) and (tick==0):
+            animationOngoing = True
+            cur_emotion = choice(EXPRESSIONS)
+            print("New expression:", cur_emotion)
+        
+        dispEmote(cur_emotion)
+        tick = (tick+1)%IDLETIME
 
     pygame.quit()
 
