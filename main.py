@@ -128,6 +128,7 @@ def main():
         if not(animationOngoing) and (tick==0):
             animationOngoing = True
             cur_expression = choice(EXPRESSIONS)
+            # cur_expression = expressions.Expression("Cross_Eyed", )
             print("New expression:", cur_expression.getName())
             print("Target:", cur_expression.getCoords())
             updateTargetCoords(cur_expression)
