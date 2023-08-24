@@ -1,13 +1,14 @@
 import pygame
 from random import choice
 import expressions
+from touch import isTouchingLeft, isTouchingRight
 
 # define constants
 WIDTH = 480
 HEIGHT = 320
 WHITE = (255, 255, 255)
 BLACK = (0, 0, 0)
-FPS = 24
+FPS = 15
 EXPRESSIONS = [
     expressions.IDLE,
     expressions.LOOK_LEFT,
@@ -19,8 +20,9 @@ EXPRESSIONS = [
     expressions.LOOK_BOTTOM_LEFT,
     expressions.LOOK_BOTTOM_RIGHT
     ]
-IDLETIME = 10
-VELOCITY = 5
+IDLETIME = 50
+VELOCITY = 7
+SENSOR_CHECK = 15                    # check sensors every X ticks
 
 # global variables
 frame = 0
@@ -36,7 +38,7 @@ currentCoords = [[140, 80], [280, 80]]
 
 
 # WIN = pygame.display.set_mode((WIDTH, HEIGHT), pygame.NOFRAME)
-WIN = pygame.display.set_mode((WIDTH, HEIGHT))
+WIN = pygame.display.set_mode((WIDTH, HEIGHT), pygame.FULLSCREEN)
 pygame.display.set_caption("ECS Project")
 
 
@@ -86,11 +88,11 @@ def updateCurrentCoords():
 def dispEye(eye, eyeType='idle'):
     global currentCoords
     
-    path = "Expressions\\Eye\\{Type}.png".format(Type = eyeType)
+    path = "C:\\Users\\jaiga\\Projects\\ECS2023_Happy\\Expressions\\Eye\\{Type}.png".format(Type = eyeType)
     try:
         img = pygame.image.load(path).convert_alpha()
     except FileNotFoundError:
-        path = "Expressions\\Eye\\idle.png"
+        path = "C:\\Users\\jaiga\\Projects\\ECS2023_Happy\\Expressions\\Eye\\idle.png"
         img = pygame.image.load(path).convert_alpha()
             
     if eye == 'left':
@@ -108,10 +110,10 @@ def main():
     global targetCoords, currentCoords
     clock = pygame.time.Clock()
     run = True
-    tick = 0
+    tick = 1
 
     # intial starter position
-    path = "Expressions\\Eye\\idle.png"
+    path = "C:\\Users\\jaiga\\Projects\\ECS2023_Happy\\Expressions\\Eye\\idle.png"
     img = pygame.image.load(path).convert_alpha()
     WIN.fill(WHITE)
     WIN.blit(img, currentCoords[0])
@@ -124,6 +126,24 @@ def main():
             if event.type == pygame.QUIT:
                 run = False
         
+        # check sensors in set intervals
+        if (tick%SENSOR_CHECK == 0):
+            # change expression if detect touch on left
+            if isTouchingLeft():
+                cur_expression = expressions.LOOK_TOP_LEFT
+                print("New expression:", cur_expression.getName())
+                print("Target:", cur_expression.getCoords())
+                updateTargetCoords(cur_expression)
+                animationOngoing = True
+
+            # change expression if detect touch on right
+            if isTouchingRight():
+                cur_expression = expressions.LOOK_TOP_RIGHT
+                print("New expression:", cur_expression.getName())
+                print("Target:", cur_expression.getCoords())
+                updateTargetCoords(cur_expression)
+                animationOngoing = True
+
         # change expression if animation not in progress
         if not(animationOngoing) and (tick==0):
             animationOngoing = True
